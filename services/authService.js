@@ -5,51 +5,112 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 /**
- * @desc Login owner
+ * @desc Login user
  * @param {object} request (validated body)
- * @returns {object}  owner, token
+ * @returns {object}  user, token
  */
-async function loginOwner(body) {
-  //get owner by email
-  const owner = await prismaService.owners.findFirst({
+async function login(body) {
+  // get table to fetch data from
+  const table =
+    body.userType === "admin"
+      ? prismaService.admins
+      : body.userType === "owner"
+      ? prismaService.owners
+      : prismaService.users;
+
+  //get user by email
+  const user = await table.findFirst({
     where: {
       email: body.email,
     },
   });
 
-  //check if owner exist and same password
-  if (!owner || !(await bcrypt.compare(body.password, owner.password))) {
+  //check if user exist and same password
+  if (!user || !(await bcrypt.compare(body.password, user.password))) {
     throw new AppError({ message: "Invalid credentials", statusCode: 401 });
   }
 
   //remove password, generate token
   return {
-    owner: { ...owner, password: undefined, id: owner.id.toString() },
-    token: generateAuthToken(owner.id.toString()),
+    user: { ...user, password: undefined, id: user.id.toString() },
+    token: generateAuthToken(user.id.toString()),
   };
 }
 
 /**
- * @desc Login admin
+ * @desc register owner based on userType
  * @param {object} request (validated body)
- * @returns {object}  admin, token
+ * @returns {object}  owner, token
  */
-async function loginAdmin(body) {
-  //get admin by email
-  const admin = await prismaService.admins.findFirst({
+async function register(body) {
+  // get table to fetch data from
+
+  const table =
+    body.userType === "admin"
+      ? prismaService.admins
+      : body.userType === "owner"
+      ? prismaService.owners
+      : prismaService.users;
+
+  const alreadyFound = await table.findFirst({
     where: {
-      email: body.email,
+      OR: [
+        {
+          email: body.email,
+        },
+        { phone: body.phone },
+      ],
     },
   });
-  //check if owner exist and same password
-  if (!admin || !(await bcrypt.compare(body.password, admin.password))) {
-    throw new AppError({ message: "Invalid credentials", statusCode: 401 });
+
+  // check for unqiue values
+  if (alreadyFound) {
+    throwParseValidationError(alreadyFound, body.email, body.phone);
   }
 
-  //remove password, generate token
+  //get user by email
+  let userPermissions;
+  if (body.userType !== "user") {
+    userPermissions = await prismaService.permissions.findFirst({
+      where: {
+        for: body.userType,
+      },
+      select: {
+        list: true,
+      },
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(body.password, 10);
+  const dataToInsert = {
+    ...body,
+    password: hashedPassword,
+    confirmPassword: undefined, //remove this field
+    permissions: body.userType !== "user" ? userPermissions.list : undefined,
+    userType: undefined, //remove this field
+  };
+
+  const createUser = await table.create({
+    data: dataToInsert,
+  });
+
+  if (!createUser) {
+    throw new AppError({
+      message: "Could not create user",
+      statusCode: 500,
+    });
+  }
+
+  const user = {
+    ...createUser,
+    password: undefined,
+    id: createUser.id.toString(),
+  };
+
   return {
-    admin: { ...admin, password: undefined, id: admin.id.toString() },
-    token: generateAuthToken(admin.id.toString()),
+    user,
+    token: generateAuthToken(user.id),
+    userType: body.userType,
   };
 }
 
@@ -66,23 +127,16 @@ const generateAuthToken = (id) => {
   return token;
 };
 
-async function registerOwner(body) {
-  const alreadyFound = await prismaService.owners.findFirst({
-    where: {
-      OR: [
-        {
-          email: body.email,
-        },
-        {
-          phone: body.phone,
-        },
-      ],
-    },
-  });
-
-  if (alreadyFound) {
+/**
+ * @description check for email | phone found and throw validation error
+ * @param {object} foundUser
+ * @param {string} email
+ * @param {string} phone
+ */
+function throwParseValidationError(foundUser, email, phone) {
+  if (foundUser) {
     const zodError = new z.ZodError([]);
-    if (alreadyFound.email === body.email) {
+    if (foundUser.email === email) {
       zodError.addIssue({
         code: z.ZodIssueCode.invalid_arguments,
         path: ["email"],
@@ -90,7 +144,7 @@ async function registerOwner(body) {
       });
       throw new ZodError(zodError.issues);
     }
-    if (alreadyFound.phone === body.phone) {
+    if (foundUser.phone === phone) {
       zodError.addIssue({
         code: z.ZodIssueCode.invalid_arguments,
         path: ["phone"],
@@ -99,26 +153,6 @@ async function registerOwner(body) {
       throw new ZodError(zodError.issues);
     }
   }
-
-  const hashedPassword = await bcrypt.hash(body.password, 10);
-
-  const createdOwner = await prismaService.owners.create({
-    data: {
-      ...body,
-      password: hashedPassword,
-    },
-  });
-
-  const owner = {
-    ...createdOwner,
-    password: undefined,
-    id: createdOwner.id.toString(),
-  };
-
-  return {
-    owner,
-    token: generateAuthToken(owner.id),
-  };
 }
 
-export { loginOwner, loginAdmin, registerOwner };
+export { login, register };

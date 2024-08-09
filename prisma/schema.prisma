@@ -9,16 +9,17 @@ datasource db {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Admins {
-  id           BigInt    @id @default(autoincrement())
-  firstName    String
-  lastName     String
-  email        String
-  password     String
-  phone        String
-  status       String    @default("active") @db.VarChar(255)
-  persmissions Json?     @db.Json
-  createdAt    DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt    DateTime? @default(now()) @db.Timestamp(0)
+  id          BigInt    @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  email       String
+  password    String
+  phone       String
+  location    String    @db.VarChar(255)
+  status      String    @default("active") @db.VarChar(255)
+  permissions Json      @db.JsonB
+  createdAt   DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt   DateTime? @default(now()) @db.Timestamp(0)
 }
 
 model Books {
@@ -58,10 +59,10 @@ model Owners {
   email       String
   password    String
   phone       String
-  location    String
+  location    String         @db.VarChar(255)
   status      String         @default("inactive") @db.VarChar(255)
   approved    Boolean        @default(false)
-  permissions Json?          @db.Json
+  permissions Json           @db.JsonB
   createdAt   DateTime       @default(now()) @db.Timestamp(0)
   updatedAt   DateTime?      @default(now()) @db.Timestamp(0)
   books       OwnerToBooks[]
@@ -91,6 +92,7 @@ model Users {
   email     String
   password  String
   phone     String
+  location  String    @db.VarChar(255)
   status    String    @default("active") @db.VarChar(255)
   createdAt DateTime  @default(now()) @db.Timestamp(0)
   updatedAt DateTime? @default(now()) @db.Timestamp(0)
@@ -109,4 +111,16 @@ model Wallets {
   owner     Owners    @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "wallets_userid_foreign")
 
   @@index([userId], map: "wallets_userid_index")
+}
+
+model Permissions {
+  id   Int      @id @default(autoincrement())
+  for  UserType @unique @default(admin)
+  list Json     @db.JsonB
+}
+
+enum UserType {
+  admin
+  owner
+  user
 }
