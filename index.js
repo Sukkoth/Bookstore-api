@@ -4,6 +4,8 @@ import morgan from "morgan";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 import AuthRoutes from "./routes/authRoutes.js";
+import BookRoutes from "./routes/bookRoutes.js";
+import OwnerRoutes from "./routes/ownerRoutes.js";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const API_VERSION = "/api/v1";
@@ -28,6 +30,8 @@ app.get(API_VERSION, (_, res) => {
 });
 
 app.use(`${API_VERSION}/auth`, AuthRoutes);
+app.use(`${API_VERSION}/books`, BookRoutes);
+app.use(`${API_VERSION}/owners`, OwnerRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

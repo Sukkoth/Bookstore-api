@@ -1,12 +1,16 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
+//handle 404 errors in the app
 const notFound = (req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
 };
 
+//handle errors in the app
 const errorHandler = (err, req, res, next) => {
+  console.error("FROM AHNDLER", err);
   //set status code
   const statusCode = err?.statusCode
     ? err?.statusCode
@@ -21,6 +25,22 @@ const errorHandler = (err, req, res, next) => {
       message: "validation failed",
       code: 422,
       errors: err.issues,
+      stack: process.env.APP_ENV === "production" ? undefined : err.stack,
+    });
+  }
+
+  // Handle specific Prisma errors [403] only
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    let errorData = { message: "", code: null };
+    if (err.code === "P2025") {
+      errorData.message = "The requested record was not found";
+      errorData.code = 404;
+    } else {
+      errorData.message = "Something went wrong";
+      errorData.code = 500;
+    }
+    return res.status(errorData.code).json({
+      ...errorData,
       stack: process.env.APP_ENV === "production" ? undefined : err.stack,
     });
   }

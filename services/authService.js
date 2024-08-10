@@ -33,7 +33,7 @@ async function login(body) {
   //remove password, generate token
   return {
     user: { ...user, password: undefined, id: user.id.toString() },
-    token: generateAuthToken(user.id.toString()),
+    token: generateAuthToken(user.id.toString(), body.userType),
   };
 }
 
@@ -79,6 +79,14 @@ async function register(body) {
         list: true,
       },
     });
+
+    if (!userPermissions) {
+      console.error("User permissions are empty, probably empty in the table");
+      throw new AppError({
+        message: "Something wen wrong",
+        statusCode: 500,
+      });
+    }
   }
 
   const hashedPassword = await bcrypt.hash(body.password, 10);
@@ -109,7 +117,7 @@ async function register(body) {
 
   return {
     user,
-    token: generateAuthToken(user.id),
+    token: generateAuthToken(user.id, body.userType),
     userType: body.userType,
   };
 }
@@ -119,8 +127,8 @@ async function register(body) {
  * @param {string}  id
  * @returns {string} token
  */
-const generateAuthToken = (id) => {
-  const token = jwt.sign({ id }, process.env.APP_KEY, {
+const generateAuthToken = (id, userType) => {
+  const token = jwt.sign({ id, userType }, process.env.APP_KEY, {
     expiresIn: "3d",
   });
 
