@@ -31,6 +31,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
     status,
     price,
     bookName,
+    owner,
     //pagination
     page = 1,
     pageSize = 10,
@@ -43,6 +44,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
     status,
     price,
     bookName,
+    owner,
     //pagination
     page,
     pageSize,

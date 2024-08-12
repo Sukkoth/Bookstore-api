@@ -84,6 +84,27 @@ async function getUserBooks(user, params) {
     });
   }
 
+  if (!!params.owner) {
+    filterArray.push({
+      owner: {
+        OR: [
+          {
+            firstName: {
+              contains: params.owner,
+              mode: "insensitive",
+            },
+          },
+          {
+            lastName: {
+              contains: params.owner,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+    });
+  }
+
   //Construct pagination
 
   const totalCount = await prismaService.ownerToBooks.count({
@@ -91,6 +112,9 @@ async function getUserBooks(user, params) {
       AND: [
         {
           ownerId: parseInt(user.id),
+          status: {
+            not: "unapproved",
+          },
         },
         ...filterArray,
       ],
@@ -106,6 +130,9 @@ async function getUserBooks(user, params) {
       AND: [
         {
           ownerId: parseInt(user.id),
+          status: {
+            not: "unapproved",
+          },
         },
         ...filterArray,
       ],
@@ -147,6 +174,7 @@ async function getUserBooks(user, params) {
       totalPages,
       pageSize: recordsPerPage,
       page: parseInt(page),
+      totalCount,
     },
   };
 }
