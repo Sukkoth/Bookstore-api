@@ -1,53 +1,10 @@
-import { AppError } from "../../middleware/errorMiddleware.js";
 import prismaService from "../prismaService.js";
-
-/**
- * @desc add books user owns [available to rent]
- * @param {object} request (validated body)
- * @returns {object}  book
- */
-async function addBook(body, user) {
-  const bookId = parseInt(body.bookId, 10);
-  const book = await prismaService.books.findFirst({
-    where: {
-      id: bookId,
-    },
-  });
-  if (!book) {
-    throw new AppError({
-      message: `Book with id of ${body.bookId} is not found`,
-      statusCode: 422,
-    });
-  }
-
-  const dataToAdd = {
-    ...body,
-    bookId,
-    price: parseFloat(body.price),
-    quantity: parseInt(body.quantity),
-    ownerId: user.id,
-    status: "unapproved",
-  };
-
-  const userBook = await prismaService.ownerToBooks.create({
-    data: dataToAdd,
-  });
-
-  if (!userBook) {
-    throw new AppError({
-      message: "Book could not be created",
-      statusCode: 500,
-    });
-  }
-
-  return userBook;
-}
 
 /**
  * @description get list of books user owns [available to rent]
  * @returns {object}  list of user books [rental books, not system books]
  */
-async function getUserBooks(user, params) {
+async function getUserBooks(params) {
   const NumberOperators = ["equals", "gt", "gte", "lt", "lte", "not"];
   const filterArray = [];
   if (!!params.status) {
@@ -88,12 +45,7 @@ async function getUserBooks(user, params) {
 
   const totalCount = await prismaService.ownerToBooks.count({
     where: {
-      AND: [
-        {
-          ownerId: parseInt(user.id),
-        },
-        ...filterArray,
-      ],
+      AND: filterArray,
     },
   });
   const recordsPerPage = parseInt(params.pageSize) || 10;
@@ -103,12 +55,7 @@ async function getUserBooks(user, params) {
 
   const userBooks = await prismaService.ownerToBooks.findMany({
     where: {
-      AND: [
-        {
-          ownerId: parseInt(user.id),
-        },
-        ...filterArray,
-      ],
+      AND: filterArray,
     },
 
     orderBy:
@@ -151,39 +98,4 @@ async function getUserBooks(user, params) {
   };
 }
 
-/**
- * @description update user book [rent book, not the actual book]
- * @returns {object}  updated book
- */
-async function updateUserBook(bookId, data) {
-  let dataToUpdate = {
-    ...data,
-    bookId: parseInt(bookId),
-    price: data.price ? parseFloat(data.price) : undefined,
-    quantity: data.quantity ? parseInt(data.quantity) : undefined,
-  };
-
-  const userBook = await prismaService.ownerToBooks.update({
-    where: {
-      id: parseInt(bookId),
-    },
-    data: dataToUpdate,
-  });
-
-  return userBook;
-}
-
-/**
- * @description delete user book [rent book, not the actual book]
- * @returns {object}  deleted book
- */
-async function deleteUserBook(bookId) {
-  const deletedBook = await prismaService.ownerToBooks.delete({
-    where: {
-      id: bookId,
-    },
-  });
-
-  return deletedBook;
-}
-export { addBook, getUserBooks, updateUserBook, deleteUserBook };
+export { getUserBooks };

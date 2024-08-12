@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Admins {
   id          Int       @id @default(autoincrement())
   firstName   String
@@ -43,7 +42,6 @@ model Categories {
   books Books[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model OwnerToBooks {
   id        Int       @id @default(autoincrement())
   quantity  Int       @default(1)
@@ -55,14 +53,13 @@ model OwnerToBooks {
   createdAt DateTime  @default(now()) @db.Timestamp(0)
   updatedAt DateTime? @default(now()) @db.Timestamp(0)
   bookInfo  Books     @relation(fields: [bookId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "owner_to_book_bookid_foreign")
-  owners    Owners    @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "owner_to_book_ownerid_foreign")
+  owner     Owners    @relation(fields: [ownerId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "owner_to_book_ownerid_foreign")
   rentals   Rentals[]
 
   @@index([bookId], map: "owner_to_book_bookid_index")
   @@index([ownerId], map: "owner_to_book_ownerid_index")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Owners {
   id          Int            @id @default(autoincrement())
   firstName   String
@@ -95,7 +92,6 @@ model Rentals {
   @@index([userId], map: "rentals_userid_index")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Users {
   id        Int       @id @default(autoincrement())
   firstName String
@@ -110,7 +106,6 @@ model Users {
   rentals   Rentals[]
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model Wallets {
   id        Int       @id @default(autoincrement())
   userId    Int

@@ -10,7 +10,6 @@ const notFound = (req, res, next) => {
 
 //handle errors in the app
 const errorHandler = (err, req, res, next) => {
-  console.error("FROM AHNDLER", err);
   //set status code
   const statusCode = err?.statusCode
     ? err?.statusCode

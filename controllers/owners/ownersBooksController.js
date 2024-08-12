@@ -26,11 +26,37 @@ const addBook = asyncHandler(async (req, res) => {
  * @route GET BASE_URL/owner/books
  */
 const getUserBooks = asyncHandler(async (req, res) => {
-  const books = await bookService.getUserBooks(req.user);
+  const {
+    bookNo,
+    status,
+    price,
+    bookName,
+    //pagination
+    page = 1,
+    pageSize = 10,
+    sortField = "id",
+    sortOrder = "asc",
+  } = req.query;
+
+  const params = {
+    bookNo,
+    status,
+    price,
+    bookName,
+    //pagination
+    page,
+    pageSize,
+    sortField,
+    sortOrder,
+  };
+
+  const { data, pagination } = await bookService.getUserBooks(req.user, params);
 
   return res.json({
     code: 200,
-    books,
+    count: data.length,
+    pagination,
+    books: data,
   });
 });
 

@@ -34,8 +34,43 @@ async function addBook(body) {
   return book;
 }
 
-async function getBooks() {
+async function getBooks(params) {
+  const filterArray = [];
+  if (!!params.name) {
+    filterArray.push({ name: { contains: params.name, mode: "insensitive" } });
+  }
+  if (!!params.authorName) {
+    filterArray.push({
+      authorName: { contains: params.authorName, mode: "insensitive" },
+    });
+  }
+  if (!!params.categoryId) {
+    filterArray.push({
+      categoryId: {
+        equals: parseInt(params.categoryId),
+      },
+    });
+  }
+
+  const totalCount = await prismaService.books.count({
+    where: filterArray.length
+      ? {
+          OR: filterArray,
+        }
+      : {},
+  });
+  const recordsPerPage = parseInt(params.pageSize) || 10;
+  const totalPages = Math.ceil(totalCount / recordsPerPage);
+
+  const page = params.page || 1;
+
   const books = await prismaService.books.findMany({
+    where: filterArray.length
+      ? {
+          OR: filterArray,
+        }
+      : {},
+
     select: {
       authorName: true,
       id: true,
@@ -48,8 +83,19 @@ async function getBooks() {
       name: true,
       info: true,
     },
+    orderBy: {
+      [params.sortField]: params.sortOrder,
+    },
+    skip: (page - 1) * recordsPerPage,
+    take: recordsPerPage,
   });
-  return books;
+  return {
+    data: books,
+    pagination: {
+      totalPages,
+      pageSize: recordsPerPage,
+    },
+  };
 }
 
 export { addBook, getBooks };
