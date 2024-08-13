@@ -7,11 +7,14 @@
       "config": { "includeFiles": ["dist/**"] }
     }
   ],
-
   "routes": [
     {
       "src": "/(.*)",
       "dest": "index.js"
     }
-  ]
+  ],
+
+  "scripts": {
+    "build": "npm install && prisma generate && npm run start"
+  }
 }
