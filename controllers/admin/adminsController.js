@@ -6,6 +6,7 @@ import ValidateBodyOnSchema from "../../utils/ValidateBodyOnSchema.js";
 const getOwners = asyncHandler(async (req, res) => {
   const {
     name,
+    owner,
     upload,
     location,
     status,
@@ -20,6 +21,7 @@ const getOwners = asyncHandler(async (req, res) => {
 
   const params = {
     name,
+    owner,
     upload,
     location,
     status,

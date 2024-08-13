@@ -24,18 +24,18 @@ export async function getOwners(params) {
   }
 
   //filter by name
-  if (!!params?.name) {
+  if (!!params.owner || !!params.name) {
     filterArray.push({
       OR: [
         {
           firstName: {
-            contains: params?.name,
+            contains: params.owner || params.name,
             mode: "insensitive",
           },
         },
         {
           lastName: {
-            contains: params?.name,
+            contains: params.owner || params.name,
             mode: "insensitive",
           },
         },
