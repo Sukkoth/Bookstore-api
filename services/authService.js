@@ -21,7 +21,10 @@ async function login(body) {
   //get user by email
   const user = await table.findFirst({
     where: {
-      email: body.email,
+      email: {
+        equals: body.email,
+        mode: "insensitive",
+      },
     },
   });
 
@@ -56,7 +59,10 @@ async function register(body) {
     where: {
       OR: [
         {
-          email: body.email,
+          email: {
+            equals: body.email,
+            mode: "insensitive",
+          },
         },
         { phone: body.phone },
       ],
@@ -64,8 +70,9 @@ async function register(body) {
   });
 
   // check for unqiue values
-  if (alreadyFound) {
+  if (!!alreadyFound) {
     throwParseValidationError(alreadyFound, body.email, body.phone);
+    return;
   }
 
   //get user by email
@@ -142,25 +149,25 @@ const generateAuthToken = (id, userType) => {
  * @param {string} phone
  */
 function throwParseValidationError(foundUser, email, phone) {
-  if (foundUser) {
-    const zodError = new z.ZodError([]);
-    if (foundUser.email === email) {
-      zodError.addIssue({
-        code: z.ZodIssueCode.invalid_arguments,
-        path: ["email"],
-        message: "Email address already in use",
-      });
-      throw new ZodError(zodError.issues);
-    }
-    if (foundUser.phone === phone) {
-      zodError.addIssue({
-        code: z.ZodIssueCode.invalid_arguments,
-        path: ["phone"],
-        message: "Phone number already in use",
-      });
-      throw new ZodError(zodError.issues);
-    }
+  const zodError = new z.ZodError([]);
+  if (foundUser.email.trim().toLowerCase() === email.trim().toLowerCase()) {
+    zodError.addIssue({
+      code: z.ZodIssueCode.invalid_arguments,
+      path: ["email"],
+      message: "Email address already in use",
+    });
+    throw new ZodError(zodError.issues);
   }
+  if (foundUser.phone.trim() === phone.trim()) {
+    zodError.addIssue({
+      code: z.ZodIssueCode.invalid_arguments,
+      path: ["phone"],
+      message: "Phone number already in use",
+    });
+    throw new ZodError(zodError.issues);
+  }
+
+  throw new Error("Unknown Error Occured");
 }
 
 export { login, register };
