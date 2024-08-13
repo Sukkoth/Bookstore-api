@@ -154,4 +154,29 @@ async function getUserBooks(params) {
   };
 }
 
-export { getUserBooks };
+/**
+ * @description update user book [rent book, not the actual book]
+ * @returns {object}  updated book
+ */
+async function updateUserBook(bookId, data) {
+  let dataToUpdate = {
+    ...data,
+
+    price: data.price ? parseFloat(data.price) : undefined,
+    quantity: data.quantity ? parseInt(data.quantity) : undefined,
+    status: data.status || undefined,
+  };
+
+  console.log({ data }, { dataToUpdate });
+
+  const userBook = await prismaService.ownerToBooks.update({
+    where: {
+      id: parseInt(bookId),
+    },
+    data: dataToUpdate,
+  });
+
+  return userBook;
+}
+
+export { getUserBooks, updateUserBook };

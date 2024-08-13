@@ -180,28 +180,6 @@ async function getUserBooks(user, params) {
 }
 
 /**
- * @description update user book [rent book, not the actual book]
- * @returns {object}  updated book
- */
-async function updateUserBook(bookId, data) {
-  let dataToUpdate = {
-    ...data,
-    bookId: parseInt(bookId),
-    price: data.price ? parseFloat(data.price) : undefined,
-    quantity: data.quantity ? parseInt(data.quantity) : undefined,
-  };
-
-  const userBook = await prismaService.ownerToBooks.update({
-    where: {
-      id: parseInt(bookId),
-    },
-    data: dataToUpdate,
-  });
-
-  return userBook;
-}
-
-/**
  * @description delete user book [rent book, not the actual book]
  * @returns {object}  deleted book
  */
@@ -214,4 +192,4 @@ async function deleteUserBook(bookId) {
 
   return deletedBook;
 }
-export { addBook, getUserBooks, updateUserBook, deleteUserBook };
+export { addBook, getUserBooks, deleteUserBook };

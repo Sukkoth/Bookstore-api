@@ -2,8 +2,6 @@ import * as bookService from "../../services/owner/ownerBooksService.js";
 import asyncHandler from "express-async-handler";
 import ValidateBodyOnSchema from "../../utils/ValidateBodyOnSchema.js";
 import UploadBookSchema from "../../zodSchemas/UploadBookSchema.js";
-import UpdateOwnedBookSchema from "../../zodSchemas/UpdateOwnedBookSchema.js";
-import { AppError } from "../../middleware/errorMiddleware.js";
 import parseId from "../../utils/parseId.js";
 
 /**
@@ -63,21 +61,6 @@ const getUserBooks = asyncHandler(async (req, res) => {
 });
 
 /**
- * @description update book [rent book]
- * @route PUT BASE_URL/owner/books
- */
-const updateUserBook = asyncHandler(async (req, res) => {
-  const data = ValidateBodyOnSchema(req.body, UpdateOwnedBookSchema);
-  const updatedBook = await bookService.updateUserBook(req.params.bookId, data);
-
-  return res.json({
-    code: 200,
-    message: "Book updated successfully",
-    book: updatedBook,
-  });
-});
-
-/**
  * @description delete book [rent book]
  * @route DELETE BASE_URL/owner/books
  */
@@ -90,4 +73,4 @@ const deleteUserBook = asyncHandler(async (req, res) => {
     book: deletedBook,
   });
 });
-export { addBook, getUserBooks, updateUserBook, deleteUserBook };
+export { addBook, getUserBooks, deleteUserBook };

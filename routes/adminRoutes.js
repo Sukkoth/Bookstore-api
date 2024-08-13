@@ -6,6 +6,7 @@ import { protect } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 router.get("/books", protect, AdminBooksController.getUserBooks);
+router.put("/books/:bookId", protect, AdminBooksController.updateUserBook);
 router.get("/owners", protect, AdminsController.getOwners);
 
 export default router;
