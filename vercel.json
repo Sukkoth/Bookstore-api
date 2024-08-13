@@ -5,7 +5,9 @@
       "src": "index.js",
       "use": "@vercel/node",
       "config": { "includeFiles": ["dist/**"] },
-      "commands": ["npm install", "prisma generate", "npm run start"]
+      "scripts": {
+        "build": "npm install && prisma generate && npm run start"
+      }
     }
   ],
   "routes": [
