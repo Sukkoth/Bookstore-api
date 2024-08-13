@@ -41,6 +41,15 @@ async function getUserBooks(params) {
     });
   }
 
+  //filter by book name
+  if (!!params.author) {
+    filterArray.push({
+      bookInfo: {
+        authorName: { contains: params.author, mode: "insensitive" },
+      },
+    });
+  }
+
   //filter by ownare name
   if (!!params.owner) {
     filterArray.push({
@@ -93,17 +102,41 @@ async function getUserBooks(params) {
               name: params.sortOrder,
             },
           }
+        : params?.sortField === "author"
+        ? {
+            bookInfo: {
+              authorName: params.sortOrder,
+            },
+          }
         : params?.sortField === "bookNo"
         ? {
             bookInfo: {
               id: params.sortOrder,
             },
           }
+        : params.sortField === "category"
+        ? {
+            bookInfo: {
+              category: {
+                name: params.sortOrder,
+              },
+            },
+          }
         : {
             [params.sortField]: params.sortOrder,
           },
     include: {
-      bookInfo: true,
+      bookInfo: {
+        select: {
+          authorName: true,
+          category: true,
+          categoryId: true,
+          id: true,
+          name: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      },
       owner: true,
     },
     skip: (page - 1) * recordsPerPage,

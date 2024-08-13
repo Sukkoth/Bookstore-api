@@ -12,7 +12,15 @@ async function countBooks(userType, userId) {
   let dataFromDb; //get data from database
 
   dataFromDb = await prismaService.ownerToBooks.findMany({
-    where: userType === "owner" ? { ownerId: userId } : {}, //if admin, no need to filter
+    where:
+      userType === "owner"
+        ? {
+            ownerId: userId,
+            status: {
+              not: "unapproved",
+            },
+          }
+        : {}, //if admin, no need to filter
     select: {
       quantity: true,
       bookInfo: {
