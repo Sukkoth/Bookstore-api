@@ -70,7 +70,7 @@ export async function getOwners(params) {
       },
     },
     orderBy:
-      params.sortField === "uploads"
+      params.sortField === "upload"
         ? {
             books: {
               _count: params.sortOrder,
