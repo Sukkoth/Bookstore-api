@@ -2,6 +2,7 @@ import * as bookService from "../../services/admin/adminBooksService.js";
 import asyncHandler from "express-async-handler";
 import UpdateOwnedBookSchema from "../../zodSchemas/UpdateOwnedBookSchema.js";
 import ValidateBodyOnSchema from "../../utils/ValidateBodyOnSchema.js";
+import ApproveOwnerSchema from "../../zodSchemas/ApproveOwnerSchema.js";
 
 /**
  * @description get books of owners [to rent]
@@ -11,6 +12,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
   const {
     bookNo,
     status,
+    approved,
     price,
     bookName,
     author,
@@ -26,6 +28,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
   const params = {
     bookNo,
     status,
+    approved,
     price,
     bookName,
     author,
@@ -54,7 +57,6 @@ const getUserBooks = asyncHandler(async (req, res) => {
  */
 const updateUserBook = asyncHandler(async (req, res) => {
   const data = ValidateBodyOnSchema(req.body, UpdateOwnedBookSchema);
-  console.log("Req", req.body);
   const updatedBook = await bookService.updateUserBook(req.params.bookId, data);
 
   return res.json({

@@ -14,6 +14,14 @@ async function getUserBooks(params) {
       },
     });
   }
+
+  if (!!params.approved) {
+    filterArray.push({
+      approved: {
+        equals: params.approved === "true" ? true : false,
+      },
+    });
+  }
   //fitler by price
   if (!!params.price) {
     const operator = {};
@@ -125,6 +133,7 @@ async function getUserBooks(params) {
         : {
             [params.sortField]: params.sortOrder,
           },
+
     include: {
       bookInfo: {
         select: {
@@ -165,9 +174,13 @@ async function updateUserBook(bookId, data) {
     price: data.price ? parseFloat(data.price) : undefined,
     quantity: data.quantity ? parseInt(data.quantity) : undefined,
     status: data.status || undefined,
+    approved:
+      data.approved === "false"
+        ? false
+        : data.approved === "true"
+        ? true
+        : undefined,
   };
-
-  console.log({ data }, { dataToUpdate });
 
   const userBook = await prismaService.ownerToBooks.update({
     where: {

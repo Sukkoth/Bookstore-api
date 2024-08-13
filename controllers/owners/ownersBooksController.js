@@ -27,6 +27,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
   const {
     bookNo,
     status,
+    approved,
     price,
     bookName,
     owner,
@@ -40,6 +41,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
   const params = {
     bookNo,
     status,
+    approved,
     price,
     bookName,
     owner,

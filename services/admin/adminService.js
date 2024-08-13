@@ -1,7 +1,6 @@
 import prismaService from "../prismaService.js";
 
 export async function getOwners(params) {
-  console.log({ params });
   const NumberOperators = ["equals", "gt", "gte", "lt", "lte", "not"];
   const filterArray = [];
 
@@ -97,4 +96,27 @@ export async function getOwners(params) {
       totalCount,
     },
   };
+}
+
+export async function deleteOwner(ownerId) {
+  const deletedUser = await prismaService.owners.delete({
+    where: {
+      id: typeof ownerId === "string" ? parseInt(ownerId) : ownerId,
+    },
+  });
+  return deletedUser;
+}
+
+export async function approveOwner(ownerId, data) {
+  const updatedUser = await prismaService.owners.update({
+    where: {
+      id: typeof ownerId === "string" ? parseInt(ownerId) : ownerId,
+    },
+    data: {
+      approved: data.approved === "true" ? true : false,
+      status: data.status || undefined,
+    },
+  });
+
+  return updatedUser;
 }

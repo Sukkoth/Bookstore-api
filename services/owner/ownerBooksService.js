@@ -26,7 +26,8 @@ async function addBook(body, user) {
     price: parseFloat(body.price),
     quantity: parseInt(body.quantity),
     ownerId: user.id,
-    status: "unapproved",
+    approved: "unapproved",
+    status: "free",
   };
 
   const userBook = await prismaService.ownerToBooks.create({
@@ -112,8 +113,8 @@ async function getUserBooks(user, params) {
       AND: [
         {
           ownerId: parseInt(user.id),
-          status: {
-            not: "unapproved",
+          approved: {
+            equals: true,
           },
         },
         ...filterArray,
@@ -130,8 +131,8 @@ async function getUserBooks(user, params) {
       AND: [
         {
           ownerId: parseInt(user.id),
-          status: {
-            not: "unapproved",
+          approved: {
+            equals: false,
           },
         },
         ...filterArray,

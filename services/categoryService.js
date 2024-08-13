@@ -16,8 +16,8 @@ async function countBooks(userType, userId) {
       userType === "owner"
         ? {
             ownerId: userId,
-            status: {
-              not: "unapproved",
+            approved: {
+              equals: true,
             },
           }
         : {}, //if admin, no need to filter

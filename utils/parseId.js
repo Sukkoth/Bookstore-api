@@ -7,7 +7,6 @@ import { AppError } from "../middleware/errorMiddleware.js";
  * @returns {number} id
  */
 function parseId(str = "", code = 422) {
-  console.log("PARSED", parseInt(str), str);
   const parsedId = parseInt(str);
   if (isNaN(parsedId)) {
     throw new AppError({
