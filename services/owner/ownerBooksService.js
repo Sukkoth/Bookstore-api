@@ -132,7 +132,7 @@ async function getUserBooks(user, params) {
         {
           ownerId: parseInt(user.id),
           approved: {
-            equals: false,
+            equals: true,
           },
         },
         ...filterArray,
