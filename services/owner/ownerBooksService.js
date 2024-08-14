@@ -26,7 +26,7 @@ async function addBook(body, user) {
     price: parseFloat(body.price),
     quantity: parseInt(body.quantity),
     ownerId: user.id,
-    approved: "unapproved",
+    approved: false,
     status: "free",
   };
 
