@@ -120,3 +120,21 @@ export async function approveOwner(ownerId, data) {
 
   return updatedUser;
 }
+
+export async function getBalance() {
+  const transactions = await prismaService.$queryRaw`
+  SELECT 
+    *,
+    SUM(amount) OVER () as totalAmount
+  FROM 
+    "Transaction";
+`;
+
+  const sum = await prismaService.transaction.aggregate({
+    _sum: {
+      amount: true,
+    },
+  });
+
+  return { transactions, balance: sum._sum.amount };
+}

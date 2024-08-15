@@ -66,4 +66,15 @@ const approveOwner = asyncHandler(async (req, res) => {
   });
 });
 
-export { getOwners, deleteOwner, approveOwner };
+const getBalance = asyncHandler(async (req, res) => {
+  const { transactions, balance } = await adminService.getBalance();
+
+  return res.json({
+    wallet: {
+      balance,
+    },
+    transactions,
+  });
+});
+
+export { getOwners, deleteOwner, approveOwner, getBalance };

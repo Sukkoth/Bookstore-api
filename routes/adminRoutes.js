@@ -8,6 +8,7 @@ const router = express.Router();
 router.get("/books", protect, AdminBooksController.getUserBooks);
 router.put("/books/:bookId", protect, AdminBooksController.updateUserBook);
 router.get("/owners", protect, AdminsController.getOwners);
+router.get("/balance", protect, AdminsController.getBalance);
 router.put("/owners/:ownerId", protect, AdminsController.approveOwner);
 router.delete("/owners/:ownerId", protect, AdminsController.deleteOwner);
 
