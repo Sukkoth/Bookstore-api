@@ -9,6 +9,7 @@ import BookRoutes from "./routes/bookRoutes.js";
 import OwnerRoutes from "./routes/ownerRoutes.js";
 import CategoriesRoutes from "./routes/categoriesRoutes.js";
 import AdminsRoutes from "./routes/adminRoutes.js";
+import UsersRoutes from "./routes/userRoutes.js";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const API_VERSION = "/api/v1";
@@ -38,6 +39,7 @@ app.use(`${API_VERSION}/books`, BookRoutes);
 app.use(`${API_VERSION}/owners`, OwnerRoutes);
 app.use(`${API_VERSION}/categories`, CategoriesRoutes);
 app.use(`${API_VERSION}/admins`, AdminsRoutes);
+app.use(`${API_VERSION}/users`, UsersRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
