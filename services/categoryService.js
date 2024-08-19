@@ -16,11 +16,18 @@ async function countBooks(userType, userId) {
       userType === "owner"
         ? {
             ownerId: userId,
+            quantity: {
+              gt: 0,
+            },
             approved: {
               equals: true,
             },
           }
-        : {}, //if admin, no need to filter
+        : {
+            quantity: {
+              gt: 0,
+            },
+          }, //if admin, no need to filter
     select: {
       quantity: true,
       bookInfo: {

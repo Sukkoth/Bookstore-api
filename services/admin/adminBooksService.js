@@ -10,7 +10,7 @@ async function getUserBooks(params) {
   if (!!params.status) {
     filterArray.push({
       status: {
-        equals: params.status,
+        equals: params.status.toLowerCase(),
       },
     });
   }
@@ -40,6 +40,20 @@ async function getUserBooks(params) {
         operator[key] = parseFloat(params.bookNo[key]);
     });
     filterArray.push({ bookId: operator });
+  }
+
+  //filter by category
+  if (!!params.category) {
+    filterArray.push({
+      bookInfo: {
+        category: {
+          name: {
+            equals: params.category,
+            mode: "insensitive",
+          },
+        },
+      },
+    });
   }
 
   //filter by book name

@@ -1,5 +1,8 @@
+import { ForbiddenError, subject } from "@casl/ability";
 import { AppError } from "../../middleware/errorMiddleware.js";
+import { defineAbility } from "../../utils/ability.js";
 import prismaService from "../prismaService.js";
+import { accessibleBy } from "@casl/prisma";
 
 /**
  * @desc add books user owns [available to rent]
@@ -54,7 +57,7 @@ async function getUserBooks(user, params) {
   if (!!params.status) {
     filterArray.push({
       status: {
-        equals: params.status,
+        equals: params.status.toLowerCase(),
       },
     });
   }
@@ -66,6 +69,20 @@ async function getUserBooks(user, params) {
         operator[key] = parseFloat(params.price[key]);
     });
     filterArray.push({ price: operator });
+  }
+
+  //filter by category
+  if (!!params.category) {
+    filterArray.push({
+      bookInfo: {
+        category: {
+          name: {
+            equals: params.category,
+            mode: "insensitive",
+          },
+        },
+      },
+    });
   }
 
   //filter by book ID (since this is as book number on frontend)
@@ -110,15 +127,7 @@ async function getUserBooks(user, params) {
 
   const totalCount = await prismaService.ownerToBooks.count({
     where: {
-      AND: [
-        {
-          ownerId: parseInt(user.id),
-          approved: {
-            equals: true,
-          },
-        },
-        ...filterArray,
-      ],
+      AND: [{ ...accessibleBy(user.ability).OwnerToBooks }, ...filterArray],
     },
   });
   const recordsPerPage = parseInt(params.pageSize) || 10;
@@ -128,15 +137,7 @@ async function getUserBooks(user, params) {
 
   const userBooks = await prismaService.ownerToBooks.findMany({
     where: {
-      AND: [
-        {
-          ownerId: parseInt(user.id),
-          approved: {
-            equals: true,
-          },
-        },
-        ...filterArray,
-      ],
+      AND: [{ ...accessibleBy(user.ability).OwnerToBooks }, ...filterArray],
     },
 
     orderBy:
@@ -184,7 +185,25 @@ async function getUserBooks(user, params) {
  * @description delete user book [rent book, not the actual book]
  * @returns {object}  deleted book
  */
-async function deleteUserBook(bookId) {
+async function deleteUserBook(bookId, user) {
+  const book = await prismaService.ownerToBooks.findFirst({
+    where: { id: bookId },
+  });
+
+  if (!book) {
+    throw new AppError({
+      statusCode: 404,
+      message: "Book not found",
+    });
+  }
+
+  if (user.ability.cannot("delete", subject("OwnerToBooks", book))) {
+    throw new AppError({
+      statusCode: 403,
+      message: "Not enough permisison to delete this resource",
+    });
+  }
+
   const deletedBook = await prismaService.ownerToBooks.delete({
     where: {
       id: bookId,

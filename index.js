@@ -10,6 +10,7 @@ import OwnerRoutes from "./routes/ownerRoutes.js";
 import CategoriesRoutes from "./routes/categoriesRoutes.js";
 import AdminsRoutes from "./routes/adminRoutes.js";
 import UsersRoutes from "./routes/userRoutes.js";
+import { protect } from "./middleware/authMiddleware.js";
 
 const APP_PORT = process.env.APP_PORT || 8000;
 const API_VERSION = "/api/v1";
@@ -40,6 +41,11 @@ app.use(`${API_VERSION}/owners`, OwnerRoutes);
 app.use(`${API_VERSION}/categories`, CategoriesRoutes);
 app.use(`${API_VERSION}/admins`, AdminsRoutes);
 app.use(`${API_VERSION}/users`, UsersRoutes);
+app.get(`${API_VERSION}/getUser`, protect, (req, res) => {
+  return res.json({
+    user: { ...req.user, ability: undefined },
+  });
+});
 
 app.use(notFound);
 app.use(errorHandler);

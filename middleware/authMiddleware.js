@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import prismaService from "../services/prismaService.js";
+import { defineAbility } from "../utils/ability.js";
 
 const protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -26,14 +27,18 @@ const protect = asyncHandler(async (req, res, next) => {
 
       const user = await table.findFirst({
         where: { id: parseInt(id) },
+        omit: {
+          password: true,
+        },
       });
 
       if (!user) {
         console.error("User not found using id in the token");
         throw new Error("User not found");
       }
+      const userAbilities = defineAbility(userType, user.id);
 
-      req.user = user;
+      req.user = { ...user, ability: userAbilities };
       req.userType = userType;
 
       next();

@@ -3,12 +3,20 @@ import asyncHandler from "express-async-handler";
 import ValidateBodyOnSchema from "../../utils/ValidateBodyOnSchema.js";
 import UploadBookSchema from "../../zodSchemas/UploadBookSchema.js";
 import parseId from "../../utils/parseId.js";
+import { AppError } from "../../middleware/errorMiddleware.js";
 
 /**
  * @description add books owners want to rent [books they own]
  * @route POST BASE_URL/owner/books
  */
 const addBook = asyncHandler(async (req, res) => {
+  if (req.user.ability.cannot("create", "OwnerToBooks")) {
+    throw new AppError({
+      statusCode: 403,
+      message: "No enough permission to create rental books",
+    });
+  }
+
   const data = ValidateBodyOnSchema(req.body, UploadBookSchema);
   const book = await bookService.addBook(data, req.user);
 
@@ -31,6 +39,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
     price,
     bookName,
     owner,
+    category,
     //pagination
     page = 1,
     pageSize = 10,
@@ -45,6 +54,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
     price,
     bookName,
     owner,
+    category,
     //pagination
     page,
     pageSize,
@@ -52,7 +62,10 @@ const getUserBooks = asyncHandler(async (req, res) => {
     sortOrder,
   };
 
-  const { data, pagination } = await bookService.getUserBooks(req.user, params);
+  const { data, pagination } = await bookService.getUserBooks(
+    { ...req.user, userType: req.userType },
+    params
+  );
 
   return res.json({
     code: 200,
@@ -68,7 +81,8 @@ const getUserBooks = asyncHandler(async (req, res) => {
  */
 const deleteUserBook = asyncHandler(async (req, res) => {
   const bookId = parseId(req.params.bookId, 403);
-  const deletedBook = await bookService.deleteUserBook(bookId);
+
+  const deletedBook = await bookService.deleteUserBook(bookId, req.user);
   return res.json({
     code: 200,
     message: "Book deleted successfully",

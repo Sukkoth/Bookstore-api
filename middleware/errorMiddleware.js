@@ -1,3 +1,4 @@
+import { ForbiddenError } from "@casl/ability";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
@@ -40,6 +41,15 @@ const errorHandler = (err, req, res, next) => {
     }
     return res.status(errorData.code).json({
       ...errorData,
+      stack: process.env.APP_ENV === "production" ? undefined : err.stack,
+    });
+  }
+
+  //Hanlde CASL error
+  if (err instanceof ForbiddenError) {
+    return res.json({
+      message: err.message,
+      code: 403,
       stack: process.env.APP_ENV === "production" ? undefined : err.stack,
     });
   }

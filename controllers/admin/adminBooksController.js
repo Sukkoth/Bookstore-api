@@ -2,13 +2,18 @@ import * as bookService from "../../services/admin/adminBooksService.js";
 import asyncHandler from "express-async-handler";
 import UpdateOwnedBookSchema from "../../zodSchemas/UpdateOwnedBookSchema.js";
 import ValidateBodyOnSchema from "../../utils/ValidateBodyOnSchema.js";
-import ApproveOwnerSchema from "../../zodSchemas/ApproveOwnerSchema.js";
-
+import { AppError } from "../../middleware/errorMiddleware.js";
 /**
  * @description get books of owners [to rent]
  * @route GET BASE_URL/admins/books
  */
 const getUserBooks = asyncHandler(async (req, res) => {
+  if (req.user.ability.cannot("read", "OwnerToBooks")) {
+    throw new AppError({
+      statusCode: 403,
+      message: "No enough permission to read this resource",
+    });
+  }
   const {
     bookNo,
     status,
@@ -56,6 +61,12 @@ const getUserBooks = asyncHandler(async (req, res) => {
  * @route PUT BASE_URL/admin/books
  */
 const updateUserBook = asyncHandler(async (req, res) => {
+  if (req.user.ability.cannot("approve", "OwnerToBooks")) {
+    throw new AppError({
+      statusCode: 403,
+      message: "You are not allowed to perform this action",
+    });
+  }
   const data = ValidateBodyOnSchema(req.body, UpdateOwnedBookSchema);
   const updatedBook = await bookService.updateUserBook(req.params.bookId, data);
 
