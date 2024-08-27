@@ -51,7 +51,13 @@ app.use(notFound);
 app.use(errorHandler);
 
 app.listen(APP_PORT, () => {
-  console.log(`Server is running on port ${APP_PORT}`);
+  console.log(
+    `Server is running on ${
+      process.env.APP_ENV === "development"
+        ? `http://localhost:${APP_PORT}`
+        : `port ${APP_PORT}`
+    }`
+  );
 });
 
 export default app;
