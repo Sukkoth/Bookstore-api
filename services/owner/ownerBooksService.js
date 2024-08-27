@@ -1,6 +1,5 @@
-import { ForbiddenError, subject } from "@casl/ability";
+import { subject } from "@casl/ability";
 import { AppError } from "../../middleware/errorMiddleware.js";
-import { defineAbility } from "../../utils/ability.js";
 import prismaService from "../prismaService.js";
 import { accessibleBy } from "@casl/prisma";
 
@@ -127,7 +126,7 @@ async function getUserBooks(user, params) {
 
   const totalCount = await prismaService.ownerToBooks.count({
     where: {
-      AND: [{ ...accessibleBy(user.ability).OwnerToBooks }, ...filterArray],
+      AND: [{ ...accessibleBy(user.permissions).OwnerToBooks }, ...filterArray],
     },
   });
   const recordsPerPage = parseInt(params.pageSize) || 10;
@@ -137,7 +136,7 @@ async function getUserBooks(user, params) {
 
   const userBooks = await prismaService.ownerToBooks.findMany({
     where: {
-      AND: [{ ...accessibleBy(user.ability).OwnerToBooks }, ...filterArray],
+      AND: [{ ...accessibleBy(user.permissions).OwnerToBooks }, ...filterArray],
     },
 
     orderBy:
@@ -197,7 +196,7 @@ async function deleteUserBook(bookId, user) {
     });
   }
 
-  if (user.ability.cannot("delete", subject("OwnerToBooks", book))) {
+  if (user.permissions.cannot("manage", subject("OwnerToBooks", book))) {
     throw new AppError({
       statusCode: 403,
       message: "Not enough permisison to delete this resource",

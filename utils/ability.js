@@ -1,6 +1,8 @@
 import { AbilityBuilder } from "@casl/ability";
 import { createPrismaAbility } from "@casl/prisma";
 
+export const createAbility = (rules) => createPrismaAbility(rules);
+
 export function defineAbility(userType, userId) {
   const { can, cannot, build } = new AbilityBuilder(createPrismaAbility);
 

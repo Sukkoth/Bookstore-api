@@ -10,7 +10,7 @@ import { AppError } from "../../middleware/errorMiddleware.js";
  * @route POST BASE_URL/owner/books
  */
 const addBook = asyncHandler(async (req, res) => {
-  if (req.user.ability.cannot("create", "OwnerToBooks")) {
+  if (req.user.permissions.cannot("manage", "OwnerToBooks")) {
     throw new AppError({
       statusCode: 403,
       message: "No enough permission to create rental books",

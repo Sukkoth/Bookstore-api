@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "express-async-handler";
 import prismaService from "../services/prismaService.js";
-import { defineAbility } from "../utils/ability.js";
+import { createAbility } from "../utils/ability.js";
+import { interpolate } from "../utils/interpolate.js";
 
 const protect = asyncHandler(async (req, res, next) => {
   let token;
@@ -14,8 +15,6 @@ const protect = asyncHandler(async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
 
       const { userType, id } = jwt.verify(token, process.env.APP_KEY);
-
-      console.log({ userType, id });
 
       // get table to fetch data from
       const table =
@@ -36,9 +35,22 @@ const protect = asyncHandler(async (req, res, next) => {
         console.error("User not found using id in the token");
         throw new Error("User not found");
       }
-      const userAbilities = defineAbility(userType, user.id);
 
-      req.user = { ...user, ability: userAbilities };
+      const permissions = await prismaService.permissions.findMany({
+        where: {
+          roleId: user.roleId,
+        },
+      });
+
+      //attach user permissions;
+      const parsedPermissions = createAbility(interpolate(permissions, user));
+
+      console.log({ permissions: permissions });
+
+      req.user = {
+        ...user,
+        permissions: parsedPermissions,
+      };
       req.userType = userType;
 
       next();

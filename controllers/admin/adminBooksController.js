@@ -8,7 +8,7 @@ import { AppError } from "../../middleware/errorMiddleware.js";
  * @route GET BASE_URL/admins/books
  */
 const getUserBooks = asyncHandler(async (req, res) => {
-  if (req.user.ability.cannot("read", "OwnerToBooks")) {
+  if (req.user.permissions.cannot("read", "OwnerToBooks")) {
     throw new AppError({
       statusCode: 403,
       message: "No enough permission to read this resource",
@@ -61,7 +61,7 @@ const getUserBooks = asyncHandler(async (req, res) => {
  * @route PUT BASE_URL/admin/books
  */
 const updateUserBook = asyncHandler(async (req, res) => {
-  if (req.user.ability.cannot("approve", "OwnerToBooks")) {
+  if (req.user.permissions.cannot("manage", "OwnerToBooks")) {
     throw new AppError({
       statusCode: 403,
       message: "You are not allowed to perform this action",

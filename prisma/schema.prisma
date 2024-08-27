@@ -9,17 +9,19 @@ datasource db {
 }
 
 model Admins {
-  id          Int       @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  email       String
-  password    String
-  phone       String
-  location    String    @db.VarChar(255)
-  status      String    @default("active") @db.VarChar(255)
-  permissions Json      @db.JsonB
-  createdAt   DateTime  @default(now()) @db.Timestamp(0)
-  updatedAt   DateTime? @default(now()) @db.Timestamp(0)
+  id        Int       @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String
+  password  String
+  phone     String
+  location  String    @db.VarChar(255)
+  status    String    @default("active") @db.VarChar(255)
+  createdAt DateTime  @default(now()) @db.Timestamp(0)
+  updatedAt DateTime? @default(now()) @db.Timestamp(0)
+  roleId    Int
+
+  @@index([roleId], map: "admins_roleid_index")
 }
 
 model Books {
@@ -63,20 +65,22 @@ model OwnerToBooks {
 }
 
 model Owners {
-  id          Int            @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  email       String
-  password    String
-  phone       String
-  location    String         @db.VarChar(255)
-  status      String         @default("active") @db.VarChar(255)
-  approved    Boolean        @default(false)
-  permissions Json           @db.JsonB
-  createdAt   DateTime       @default(now()) @db.Timestamp(0)
-  updatedAt   DateTime?      @default(now()) @db.Timestamp(0)
-  books       OwnerToBooks[]
-  wallet      Wallets[]
+  id        Int            @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String
+  password  String
+  phone     String
+  location  String         @db.VarChar(255)
+  status    String         @default("active") @db.VarChar(255)
+  approved  Boolean        @default(false)
+  createdAt DateTime       @default(now()) @db.Timestamp(0)
+  updatedAt DateTime?      @default(now()) @db.Timestamp(0)
+  roleId    Int
+  books     OwnerToBooks[]
+  wallet    Wallets[]
+
+  @@index([roleId], map: "owners_roleid_index")
 }
 
 model Rentals {
@@ -137,10 +141,22 @@ model Transaction {
   @@index([rentalId], map: "transaction_rentalid_index")
 }
 
+model Roles {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  permissions Permissions[]
+}
+
 model Permissions {
-  id   Int      @id @default(autoincrement())
-  for  UserType @unique @default(admin)
-  list Json     @db.JsonB
+  id         Int    @id @default(autoincrement())
+  subject    String
+  action     String
+  conditions Json?  @db.JsonB
+  Role       Roles? @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  roleId     Int?
+
+  @@index([roleId], map: "permission_roleid_index")
 }
 
 enum UserType {

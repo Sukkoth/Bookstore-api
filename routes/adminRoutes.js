@@ -12,4 +12,6 @@ router.get("/balance", protect, AdminsController.getBalance);
 router.put("/owners/:ownerId", protect, AdminsController.approveOwner);
 router.delete("/owners/:ownerId", protect, AdminsController.deleteOwner);
 
+router.get("/create-permissions", protect, AdminsController.createPermissions);
+
 export default router;

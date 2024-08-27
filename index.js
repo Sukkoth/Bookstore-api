@@ -43,7 +43,7 @@ app.use(`${API_VERSION}/admins`, AdminsRoutes);
 app.use(`${API_VERSION}/users`, UsersRoutes);
 app.get(`${API_VERSION}/getUser`, protect, (req, res) => {
   return res.json({
-    user: { ...req.user, ability: undefined },
+    user: { ...req.user, permissions: undefined },
   });
 });
 

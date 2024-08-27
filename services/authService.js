@@ -76,24 +76,20 @@ async function register(body) {
   }
 
   //get user by email
-  let userPermissions;
-  if (body.userType !== "user") {
-    userPermissions = await prismaService.permissions.findFirst({
-      where: {
-        for: body.userType,
-      },
-      select: {
-        list: true,
-      },
-    });
+  let userRole;
 
-    if (!userPermissions) {
-      console.error("User permissions are empty, probably empty in the table");
-      throw new AppError({
-        message: "Something wen wrong",
-        statusCode: 500,
-      });
-    }
+  userRole = await prismaService.roles.findFirst({
+    where: {
+      name: body.userType,
+    },
+  });
+
+  if (!userRole) {
+    console.error("Roles table is empty, probably empty in the table");
+    throw new AppError({
+      message: "Something went wrong",
+      statusCode: 500,
+    });
   }
 
   const hashedPassword = await bcrypt.hash(body.password, 10);
@@ -101,8 +97,8 @@ async function register(body) {
     ...body,
     password: hashedPassword,
     confirmPassword: undefined, //remove this field
-    permissions: body.userType !== "user" ? userPermissions.list : undefined,
-    userType: undefined, //remove this field
+    userType: undefined,
+    roleId: userRole.id,
   };
 
   const createUser = await table.create({
