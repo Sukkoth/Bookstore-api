@@ -115,6 +115,10 @@ model Users {
   updatedAt    DateTime?     @default(now()) @db.Timestamp(0)
   rentals      Rentals[]
   transactions Transaction[]
+  roleId       Int
+  role         Roles         @relation(fields: [roleId], references: [id])
+
+  @@index([roleId], map: "users_roleid_index")
 }
 
 model Wallets {
@@ -150,6 +154,7 @@ model Roles {
   permissions Permissions[]
   Admins      Admins[]
   Owners      Owners[]
+  Users       Users[]
 }
 
 model Permissions {
