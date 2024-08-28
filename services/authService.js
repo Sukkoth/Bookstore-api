@@ -26,6 +26,14 @@ async function login(body) {
         mode: "insensitive",
       },
     },
+    include: {
+      role: {
+        select: {
+          name: true,
+          permissions: true,
+        },
+      },
+    },
   });
 
   //check if user exist and same password

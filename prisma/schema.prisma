@@ -20,6 +20,7 @@ model Admins {
   createdAt DateTime  @default(now()) @db.Timestamp(0)
   updatedAt DateTime? @default(now()) @db.Timestamp(0)
   roleId    Int
+  role      Roles     @relation(fields: [roleId], references: [id])
 
   @@index([roleId], map: "admins_roleid_index")
 }
@@ -79,6 +80,7 @@ model Owners {
   roleId    Int
   books     OwnerToBooks[]
   wallet    Wallets[]
+  role      Roles          @relation(fields: [roleId], references: [id])
 
   @@index([roleId], map: "owners_roleid_index")
 }
@@ -146,6 +148,8 @@ model Roles {
   name String
 
   permissions Permissions[]
+  Admins      Admins[]
+  Owners      Owners[]
 }
 
 model Permissions {

@@ -29,6 +29,14 @@ const protect = asyncHandler(async (req, res, next) => {
         omit: {
           password: true,
         },
+        include: {
+          role: {
+            select: {
+              name: true,
+              permissions: true,
+            },
+          },
+        },
       });
 
       if (!user) {
@@ -36,19 +44,18 @@ const protect = asyncHandler(async (req, res, next) => {
         throw new Error("User not found");
       }
 
-      const permissions = await prismaService.permissions.findMany({
-        where: {
-          roleId: user.roleId,
-        },
-      });
+      const permissions = user.role?.permissions;
 
       //attach user permissions;
-      const parsedPermissions = createAbility(interpolate(permissions, user));
-
-      console.log({ permissions: permissions });
+      const rawPermissions = interpolate(permissions, user);
+      const parsedPermissions = createAbility(rawPermissions);
 
       req.user = {
         ...user,
+        role: {
+          ...user.role,
+          permissions: rawPermissions,
+        },
         permissions: parsedPermissions,
       };
       req.userType = userType;
