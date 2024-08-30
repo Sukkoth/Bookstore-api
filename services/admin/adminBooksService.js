@@ -1,10 +1,11 @@
 import prismaService from "../prismaService.js";
+// import { prismaQueryGenerator } from "../../utils/prismaQueryGenerator.js";
 
 /**
  * @description get list of books user owns [available to rent]
  * @returns {object}  list of user books [rental books, not system books]
  */
-async function getUserBooks(params) {
+async function getUserBooks(params, filtersArray) {
   const NumberOperators = ["equals", "gt", "gte", "lt", "lte", "not"];
   const filterArray = [];
   if (!!params.status) {
@@ -93,6 +94,9 @@ async function getUserBooks(params) {
       },
     });
   }
+
+  // const { where } = prismaQueryGenerator(filtersArray, "OwnerToBooks");
+  // console.log("FINAL", JSON.stringify(where));
 
   //Construct pagination
 

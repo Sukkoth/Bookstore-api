@@ -23,6 +23,7 @@
     "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "prisma-json-schema-generator": "^5.1.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {

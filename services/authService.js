@@ -29,8 +29,11 @@ async function login(body) {
     include: {
       role: {
         select: {
-          name: true,
-          permissions: true,
+          roleToPermissions: {
+            select: {
+              permissions: true,
+            },
+          },
         },
       },
     },
@@ -42,8 +45,18 @@ async function login(body) {
   }
 
   //remove password, generate token
+  console.log(user);
   return {
-    user: { ...user, password: undefined, id: user.id.toString() },
+    user: {
+      ...user,
+      role: {
+        permissions: user.role.roleToPermissions.map(
+          (item) => item.permissions
+        ),
+      },
+      password: undefined,
+      id: user.id.toString(),
+    },
     token: generateAuthToken(user.id.toString(), body.userType),
   };
 }

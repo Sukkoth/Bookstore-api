@@ -32,8 +32,11 @@ const protect = asyncHandler(async (req, res, next) => {
         include: {
           role: {
             select: {
-              name: true,
-              permissions: true,
+              roleToPermissions: {
+                select: {
+                  permissions: true,
+                },
+              },
             },
           },
         },
@@ -44,7 +47,13 @@ const protect = asyncHandler(async (req, res, next) => {
         throw new Error("User not found");
       }
 
-      const permissions = user.role?.permissions;
+      const roles = {
+        permissions: user.role.roleToPermissions.map(
+          (item) => item.permissions
+        ),
+      };
+
+      const permissions = roles.permissions;
 
       //attach user permissions;
       const rawPermissions = interpolate(permissions, user);
@@ -53,7 +62,6 @@ const protect = asyncHandler(async (req, res, next) => {
       req.user = {
         ...user,
         role: {
-          ...user.role,
           permissions: rawPermissions,
         },
         permissions: parsedPermissions,

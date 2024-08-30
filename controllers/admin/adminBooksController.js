@@ -46,7 +46,13 @@ const getUserBooks = asyncHandler(async (req, res) => {
     sortOrder,
   };
 
-  const { data, pagination } = await bookService.getUserBooks(params);
+  console.log("FILTERS", req.query);
+
+  // TODO fix this duplicate param pass
+  const { data, pagination } = await bookService.getUserBooks(
+    params,
+    JSON.parse(req.query.filters)
+  );
 
   return res.json({
     code: 200,
